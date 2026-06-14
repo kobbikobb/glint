@@ -25,6 +25,31 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         statusItem.menu = menu
+
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self,
+            selector: #selector(screenDidWake),
+            name: NSWorkspace.didWakeNotification,
+            object: nil
+        )
+    }
+
+    @objc func screenDidWake() {
+        let hour = Calendar.current.component(.hour, from: Date())
+        let totalMinutes = hour * 60 + Calendar.current.component(.minute, from: Date())
+
+        guard (300...660).contains(totalMinutes) else { return }
+
+        let today = Calendar.current.startOfDay(for: Date())
+        if let last = UserDefaults.standard.object(forKey: "lastGlintDate") as? Date,
+           Calendar.current.isDate(last, inSameDayAs: today) {
+            return
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 60) { [weak self] in
+            UserDefaults.standard.set(Date(), forKey: "lastGlintDate")
+            self?.showWindow()
+        }
     }
 
     @objc func showWindow() {
