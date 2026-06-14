@@ -23,9 +23,9 @@ Scaffold, menu bar, welcome screen, git, CI, morning unlock detection.
 
 ## Slice 5 — Storage abstraction
 
-- [ ] 5a  Define `Storage` protocol (save/load Items, source configs)
-- [ ] 5b  `UserDefaultsStorage` implementation (zero setup, fast iteration)
-- [ ] 5c  Wire up so all data access goes through the protocol
+- [x] 5a  Define `Storage` protocol (save/load Items, source configs)
+- [x] 5b  `UserDefaultsStorage` implementation (zero setup, fast iteration)
+- [x] 5c  Wire up so all data access goes through the protocol
 
 ## Slice 6 — Guided onboarding (first-run UX)
 
