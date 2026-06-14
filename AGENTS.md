@@ -5,33 +5,39 @@ Every change goes through: **Plan → Challenge → Implement → Validate**
 ## The loop
 
 ```
-┌──────────────────────────────────────────────────┐
-│  1. Plan                                          │
-│     Write or update the milestone in PLAN.md      │
-│     Include clear DoD for each step               │
-├──────────────────────────────────────────────────┤
-│  2. Challenge                                     │
-│     Read existing code + docs.                    │
-│     Stress-test the plan before writing code:     │
-│     • Does this contradict ARCHITECTURE.md?       │
-│     • Are there edge cases not handled?           │
-│     • Is there a simpler way?                     │
-│     • Does the DoD actually prove completion?     │
-│     Raise issues. Resolve before moving on.       │
-├──────────────────────────────────────────────────┤
-│  3. Implement                                     │
-│     Write the code. Follow code style rules.      │
-│     • Lean. No comments unless WHY is non-obvious │
-│     • Match existing patterns in the repo         │
-│     • One conceptual change per PR                │
-├──────────────────────────────────────────────────┤
-│  4. Validate                                      │
-│     • Build: make build passes                    │
-│     • Test: make test passes (or add tests)       │
-│     • CI: green check on the PR                   │
-│     • Demo-able: can you run it and see it work?  │
-│     • DoD: every checkbox in the milestone is ✓   │
-└──────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────┐
+│  1. Plan                                               │
+│     Write or update the milestone in PLAN.md           │
+│     Include clear DoD for each step                    │
+├───────────────────────────────────────────────────────┤
+│  2. Challenge (sub-agent)                              │
+│     Spawn a fresh agent to review the plan.            │
+│     Provide: PLAN.md, ARCHITECTURE.md, existing code.  │
+│     Ask them to challenge:                             │
+│     • Does this contradict ARCHITECTURE.md?            │
+│     • Are there edge cases not handled?                │
+│     • Is there a simpler way?                          │
+│     • Does the DoD actually prove completion?          │
+│     Sub-agent returns their findings.                  │
+│     Resolve issues before moving to implement.         │
+├───────────────────────────────────────────────────────┤
+│  3. Implement                                          │
+│     Write the code. Follow code style rules.           │
+│     • Lean. No comments unless WHY is non-obvious      │
+│     • Match existing patterns in the repo              │
+│     • One conceptual change per PR                     │
+├───────────────────────────────────────────────────────┤
+│  4. Validate (sub-agent)                               │
+│     Spawn a fresh agent to validate the result.        │
+│     Provide: PLAN.md milestone, DoD, the diff.         │
+│     Ask them to confirm:                               │
+│     • Build: make build passes                         │
+│     • Test: make test passes (or tests added)          │
+│     • CI: green check on the PR                        │
+│     • Demo-able: can you run it and see it work?       │
+│     • DoD: every checkbox in the milestone is ✓        │
+│     Sub-agent approves or rejects with reasons.        │
+└───────────────────────────────────────────────────────┘
 ```
 
 ## Milestone DoD requirements
