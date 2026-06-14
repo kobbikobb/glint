@@ -1,19 +1,19 @@
 ---
 name: next-slice
 description: >
-  Merge the current PR, pull main, determine the next slice from PLAN.md,
-  create a branch, then hand off to /manual with a random "your turn" phrase.
-  Use when the user says "/next" or "next slice".
+  Verify the current PR is merged, pull main, determine the next slice from
+  PLAN.md, create a branch, then run the guided implementation flow with a
+  random "your turn" phrase. Use when the user says "/next" or "next slice".
 ---
 
 # /next — Advance to the next slice
 
 ## Steps
 
-1. **Verify current PR merged**
+1. **Verify current PR is merged**
    - Check if the current branch has an open PR via `gh pr view`
-   - If open and merged → proceed.
-   - If not merged, stop: "PR #[n] is not merged yet. Merge it first, then run /next again."
+   - If the PR state is `MERGED` → proceed.
+   - If the PR is still open, stop: "PR #[n] is not merged yet. Merge it on GitHub, then run /next again."
 
 2. **Pull main**
    - `git checkout main && git pull origin main`
@@ -36,6 +36,7 @@ description: >
    - "Take it from here."
    - "This is where you earn your coffee."
 
-6. **Hand off to /manual**
-   - Load the `manual` skill and follow its guided implementation flow.
-   - Tell the user the slice number and title before starting.
+6. **Start guided implementation**
+   - Follow the workflow defined in `.opencode/skills/manual/SKILL.md` — split into missions, present one at a time, wait for `/verify`, etc.
+   - Do NOT ask the user to load `/manual` as a skill. The manual flow is part of this session now.
+   - Tell the user the slice number and title, then present the first mission.
