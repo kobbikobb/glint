@@ -38,10 +38,22 @@ Scaffold, menu bar, welcome screen, git, CI, morning unlock detection.
 
 ## Slice 7 — Source protocol + job runner
 
-- [ ] 7a  Refine `Source` protocol: `func fetch() async throws -> [Item]`
-- [ ] 7b  `JobRunner` — runs each configured source, stores results in DB
-- [ ] 7c  Scheduler calls `JobRunner` on morning trigger (instead of showing popup directly)
-- [ ] 7d  Popup reads from DB after jobs complete
+- [x] 7a  Refine `Source` protocol: `func fetch() async throws -> [Item]`
+- [x] 7b  `JobRunner` — runs each configured source, stores results in DB
+- [x] 7c  Scheduler calls `JobRunner` on morning trigger (instead of showing popup directly)
+- [x] 7d  Popup reads from DB after jobs complete
+
+## Slice 7.5 — Architecture cleanup (seams)
+
+_Establish correct seams before adding real sources._
+
+- [ ] 7.5a  Split `Storage` into `ItemStore` + `ConfigStore` protocols, separate implementations
+- [ ] 7.5b  Extract `AppDelegate` from `GlintApp.swift` into `App/AppDelegate.swift`
+- [ ] 7.5c  Extract `Scheduler` from `AppDelegate` into `Gleaner/Scheduler.swift`
+- [ ] 7.5d  Create `Services/DigestService.swift` — UI-facing load/classify/group (ContentView stops importing Storage)
+- [ ] 7.5e  Create `Agent/Classifier.swift` protocol + `Agent/NoopClassifier.swift` placeholder
+- [ ] 7.5f  Add CI guardrails: import-boundary checks, directory-structure check, dead-symbol detection
+- [ ] 7.5g  Move `ContentView.swift` → `UI/PopupView.swift`, restructure directories to match target layout
 
 ## Slice 8 — Facebook OAuth
 

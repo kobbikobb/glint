@@ -14,33 +14,110 @@ Native macOS app (menu bar + popup window). No server. Everything runs locally.
 | LLM client | HTTP to Ollama | OpenAI-compatible API, local |
 | Keychain | Security framework | OAuth tokens, credentials |
 
+## Seams
+
+The architecture is organised around five seams that isolate concerns. Each seam maps to a directory in the source tree.
+
+| Seam | Directory | Responsibility | Talks to |
+|---|---|---|---|
+| **Fetch** | `Sources/` | Implement `Source` protocol, call external APIs | `ItemStore` |
+| **Orchestrate** | `Gleaner/` | Schedule and run fetch jobs | `Sources/`, `ItemStore` |
+| **Store** | `Storage/` | Persist items and config behind protocols | nothing (protocol) |
+| **Service** | `Services/` | UI-facing logic: load, classify, group | `ItemStore`, `Agent/` |
+| **Agent** | `Agent/` | Classify/summarise items (LLM or no-op) | nothing (protocol) |
+
+UI talks only to **Service**. Service talks to **Store** and **Agent**. Fetch talks to **Store**. This prevents circular dependencies and makes each seam testable in isolation.
+
 ## Components
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  Glint (menu bar app)                                │
-│  ┌──────────┐  ┌──────────┐  ┌───────────────────┐  │
-│  │ Scheduler │  │ Source   │  │ LLM Engine        │  │
-│  │           │  │ Manager  │  │ (optional)        │  │
-│  └─────┬─────┘  └─────┬────┘  └────────┬──────────┘  │
-│        │              │                 │             │
-│  ┌─────┴──────────────┴─────────────────┴──────────┐ │
-│  │  Gleaner (orchestrator)                          │ │
-│  │  fetches → caches → classifies → assembles       │ │
-│  └───────────────────┬──────────────────────────────┘ │
-│                      │                                │
-│  ┌───────────────────┴──────────────────────────────┐ │
-│  │  Popup Window (NSWindow / NSPanel)                │ │
-│  └──────────────────────────────────────────────────┘ │
-│                                                       │
-│  ┌──────────────────────────────────────────────────┐ │
-│  │  Preferences Window (SwiftUI)                     │ │
-│  │  • Source connections & OAuth                     │ │
-│  │  • Per-source filters                             │ │
-│  │  • LLM on/off & model selection                   │ │
-│  └──────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│  Glint (menu bar app)                                     │
+│                                                           │
+│  ┌──────────────────┐  ┌──────────────┐                  │
+│  │  Scheduler        │  │  JobRunner   │                  │
+│  │  (screen wake)    │──│  (actor)     │                  │
+│  └──────────────────┘  └──────┬───────┘                  │
+│                               │                           │
+│                     ┌─────────┼──────────┐               │
+│                     │         │          │               │
+│              ┌──────▼──┐  ┌──▼──────┐   │               │
+│              │ Source A│  │ Source B│   │   Source prot. │
+│              └──────┬──┘  └──┬──────┘   │               │
+│                     │         │          │               │
+│                     └─────────┼──────────┘               │
+│                               │ Items                     │
+│                     ┌─────────▼──────────┐               │
+│                     │  ItemStore          │  ◄── protocol │
+│                     │  (SQLite/UserDef)   │               │
+│                     └────────────────────┘               │
+│                               ▲                           │
+│                               │ today's items             │
+│  ┌────────────────────────────┼────────────────────────┐ │
+│  │  Services                  │                         │ │
+│  │  ┌─────────────────────────▼─────────────────┐      │ │
+│  │  │  DigestService                             │      │ │
+│  │  │  load(group:) → classified → grouped       │      │ │
+│  │  └─────────────────────────┬─────────────────┘      │ │
+│  │                            │                          │ │
+│  │  ┌─────────────────────────▼─────────────────┐      │ │
+│  │  │  Classifier (agent seam)                   │      │ │
+│  │  │  NoopClassifier (pass-through)              │      │ │
+│  │  └───────────────────────────────────────────┘      │ │
+│  └────────────────────────────────────────────────────┘ │
+│                            │ view model                   │
+│  ┌─────────────────────────▼────────────────────────┐   │
+│  │  UI (PopupView, PreferencesView)                  │   │
+│  │  reads from DigestService only — never Storage    │   │
+│  └──────────────────────────────────────────────────┘   │
+│                                                           │
+│  ┌──────────────────────────────────────────────────────┐│
+│  │  ConfigStore (separate from ItemStore)                ││
+│  │  SourceConfig, authState, preferences                 ││
+│  └──────────────────────────────────────────────────────┘│
+└──────────────────────────────────────────────────────────┘
 ```
+
+## Data flow
+
+**Configure (once):**
+```
+User sets up sources in Preferences
+  → ConfigStore.saveSourceConfig()
+  → OAuth token → Keychain (future)
+```
+
+**Run (daily, background):**
+```
+Scheduler fires (didWakeNotification)
+  → JobRunner.runAll()
+    → for each enabled SourceConfig:
+      → Source.fetch() → [Item]
+      → ItemStore.saveItems()
+```
+
+**Display (instant):**
+```
+Popup opens
+  → DigestService.load()
+    → ItemStore.items(for: today) → [Item]
+    → Classifier.classify([Item]) → [Item] with urgency
+    → Group by urgency / source
+    → Return view model
+  → PopupView renders view model
+  → Auto-dismiss after N seconds
+```
+
+## Key architectural decisions
+
+1. **Fetch/display decoupling** — popup never calls APIs. Sources run as background jobs. Popup reads from cache. Instant, offline-capable.
+2. **ItemStore + ConfigStore** — data access behind two protocols. `ItemStore` for daily digest (ephemeral, date-keyed). `ConfigStore` for app configuration (persistent, stable keys). Different storage implementations can differ per seam.
+3. **Plugin sources via protocol** — adding a new source means writing one struct implementing `Source`. No core changes.
+4. **Services layer** — `DigestService` sits between UI and Storage. UI never imports Storage. Makes the popup testable: mock ItemStore + mock Classifier → verify grouping.
+5. **Agent seam** — `Classifier` protocol with a `NoopClassifier` pass-through. The LLM implementation slots in later. UI doesn't know which classifier it's using.
+6. **Rule-based fallback** — app works fully without an LLM. LLM is a quality-of-life upgrade.
+7. **No cloud** — everything runs on-device. Future optional cloud-LLM is an upgrade path.
+8. **OAuth tokens in Keychain** — standard macOS security practice.
 
 ## Data sources (adapters)
 
@@ -124,44 +201,38 @@ Show NSWindow popup (auto-dismiss after N seconds)
 
 ## Key architectural decisions
 
-1. **Fetch/display decoupling** — popup never calls APIs. Sources run as background jobs. Popup reads from cache. Instant, offline-capable.
-2. **Storage protocol** — data access behind an interface. Use `UserDefaultsStorage` for prototyping, swap to `SQLiteStorage` later with zero code changes.
-3. **Plugin sources via protocol** — adding a new source means writing one struct implementing `Source`. No core changes.
-4. **Rule-based fallback** — app works fully without an LLM. LLM is a quality-of-life upgrade.
-5. **No cloud** — everything runs on-device. Future optional cloud-LLM is an upgrade path.
-6. **OAuth tokens in Keychain** — standard macOS security practice.
-
-## File layout (projected)
+## File layout (target)
 
 ```
-Glint/
+Sources/Glint/
+├── App/
+│   ├── GlintApp.swift          # @main
+│   └── AppDelegate.swift       # NSApplicationDelegate, menu bar, lifecycle
+├── Gleaner/
+│   ├── Scheduler.swift         # screen wake detection + trigger
+│   └── JobRunner.swift         # runs sources, stores results
 ├── Sources/
-│   ├── App/
-│   │   ├── GlintApp.swift          # @main, menu bar setup
-│   │   └── AppDelegate.swift       # NSApplicationDelegate
-│   ├── Gleaner/
-│   │   ├── Gleaner.swift           # orchestrator
-│   │   └── Scheduler.swift         # activity detection + trigger
-│   ├── Sources/
-│   │   ├── Source.swift            # protocol
-│   │   ├── CalendarSource.swift
-│   │   ├── GmailSource.swift
-│   │   └── FacebookSource.swift
-│   ├── LLM/
-│   │   ├── LLMEngine.swift         # Ollama HTTP client
-│   │   └── Prompts.swift           # classification prompts
-│   ├── Storage/
-│   │   ├── Cache.swift             # SQLite via GRDB
-│   │   └── Keychain.swift          # token storage
-│   ├── UI/
-│   │   ├── PopupWindow.swift       # floating popup (AppKit)
-│   │   ├── PopupView.swift         # popup content (SwiftUI)
-│   │   └── PreferencesView.swift   # settings (SwiftUI)
-│   └── Models/
-│       ├── Item.swift              # unified data model
-│       ├── Classification.swift    # urgent / important / noise
-│       └── SourceConfig.swift      # per-source settings
-├── Resources/
-│   └── Assets.xcassets
-└── Package.swift                   # (or .xcodeproj)
-```
+│   ├── Source.swift            # protocol
+│   ├── FacebookSource.swift    # (future)
+│   ├── GoogleCalendarSource.swift
+│   ├── GmailSource.swift
+│   └── OutlookSource.swift
+├── Services/
+│   └── DigestService.swift     # UI-facing: load → classify → group
+├── Agent/
+│   ├── Classifier.swift        # protocol: classify([Item]) -> [Item]
+│   └── NoopClassifier.swift   # pass-through (placeholder)
+├── Storage/
+│   ├── ItemStore.swift         # protocol: daily digest CRUD
+│   ├── ConfigStore.swift       # protocol: app config CRUD
+│   ├── UserDefaultsItemStore.swift
+│   ├── UserDefaultsConfigStore.swift
+│   └── Keychain.swift          # (future)
+├── UI/
+│   ├── PopupView.swift         # popup content (SwiftUI), reads DigestService
+│   ├── OnboardingView.swift    # first-run wizard (pure UI)
+│   └── PreferencesView.swift   # settings (future)
+└── Models/
+    ├── Item.swift              # unified data model
+    ├── Classification.swift    # urgent / important / noise (future)
+    └── SourceConfig.swift      # per-source settings
