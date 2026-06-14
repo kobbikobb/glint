@@ -8,63 +8,64 @@ description: >
 
 # /manual — Guided implementation
 
+## Philosophy
+
+The user learns by solving the puzzle — looking at the codebase, figuring out where a change goes, and structuring the solution themselves. The AI's job is to point at the right puzzle, then get out of the way.
+
+**Never give** code snippets unprompted. **Never suggest** approach, syntax, or implementation details in the mission. Focus on *why* and *where* — the *how* is the user's puzzle.
+
 ## Restraint rule (critical)
 
-After presenting a mission, say **only** `Now it's your turn.` Do not suggest approaches, offer to pair, or propose code. Silence is the goal — the user learns by typing.
+After presenting a mission, say **only** `Now it's your turn.` Then stop. No suggestions, no "you could", no approach hints.
 
-If they ask you to write the code, remind them this is their mission. If they're genuinely stuck after 3 hints, offer `/reveal`.
-
-## Mission sizing
-
-A mission should fit in **one file or one concept** (≤3 files, 1 abstraction boundary). If the slice step looks bigger, split it into multiple missions. Roughly 5-15 minutes of work per mission.
+If the user asks you to write code, remind them this is their mission: "I can point you at the right file or explain why this exists, but the implementation is yours."
 
 ## Mission format
 
 ```
-Mission N/M: <short title>
+Mission N/M: <title>
 
 Files: <path, path>
-Outcome: <one sentence — what success looks like>
-Verify: <how to check — e.g. "make build passes", "the test compiles">
+Context: <why this exists — architecture rationale, not implementation>
+Verify: <how to check — "make build passes", "the test compiles">
 
 Now it's your turn.
 ```
+
+`Context` is the key field. It explains the architectural decision that motivates the mission — why `ItemStore` and `ConfigStore` are separate protocols, why the scheduler lives in `Gleaner/`, etc. This is what the user needs to orient themselves.
+
+No `Outcome` field — the mission title + context already say what to build.
+
+## Mission sizing
+
+One file or one concept (≤3 files, 1 abstraction boundary). If a step is bigger, split it. Roughly 5-15 minutes of work.
 
 ## User commands
 
 | Command | Response |
 |---|---|
-| `/hint` | Progressive: first → which file, second → approach, third → code sketch. |
-| `/reveal` | Show the full reference implementation. Does NOT verify or commit — the user studies it, then calls `/verify` to proceed. |
-| `/skip` | Mark mission incomplete, discard unstaged changes (revert if committed), move to next. |
-| `/abort` | Cancel the entire slice. Drop the branch, `git checkout main`, ask what next. |
-| `/status` | Print the current slice, current mission, completed missions, and remaining missions. |
-| `/restart` | Reset the current mission: revert working-tree changes or the last commit so the user can start fresh. |
-| `/verify` | Review the user's work. If correct → commit with message `mission-N: <title>` and advance. If not → explain what needs fixing and wait for another `/verify`. |
+| `/hint` | Tell the user which file or area to look at, or point at existing code that does something similar. No code snippets unless asked. |
+| `/reveal` | Show the full reference implementation. Last resort — the user wants to study. Does NOT verify or commit; user calls `/verify` after. |
+| `/skip` | Discard unstaged changes (revert if committed), move to next mission. |
+| `/abort` | Cancel the entire slice. Drop the branch, `git checkout main`. |
+| `/status` | Print current mission, completed, remaining. |
+| `/restart` | Reset current mission: revert working-tree changes or last commit so the user can start fresh. |
+| `/verify` | Review the user's work. If correct → commit `mission-N: <title>` and advance. If not → explain what to fix. User fixes and calls `/verify` again. |
 
-## Commit discipline
+## Conversation state
 
-Each verified mission gets its own commit:
-```
-mission-N: <short title>
-```
-
-No squashing. Each commit is a checkpoint.
-
-## Conversation state (no file-based state)
-
-Track the following in conversation context:
+Track in conversation (no file-based state):
 
 - Current slice number and title
 - Current mission index (N of M)
-- Completed missions list
+- Completed missions
 - Current branch name
 
-If the user calls `/verify` when no mission is active, refuse: "There is no active mission. Call `/status` to see where we are."
+If `/verify` with no active mission: "There is no active mission. Try `/status`."
 
 ## Edge cases
 
-- If `/verify` fails and the user is stuck after 3 hints, suggest `/reveal`.
-- If changes don't compile, report the compiler error — don't fix it for them.
-- Missing files: name them in the mission, let the user create them.
-- Branch switch mid-session: detect via `git branch --show-current`. If it doesn't match the tracked branch, warn and refuse commands until resolved.
+- 3 hints used and still stuck → suggest `/reveal`.
+- Compiler error → report it verbatim, don't fix.
+- Missing files → name them in the mission, user creates them.
+- Branch mismatch → warn and refuse commands until resolved.
