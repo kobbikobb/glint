@@ -24,6 +24,62 @@ final class GlintTests: XCTestCase {
         XCTAssertEqual(saved[0].id, "1")
     }
 
+    func testSchedulerReturnsFalseWhenNotMorning() {
+        let defaults = freshDefaults()
+        let scheduler = makeScheduler(defaults: defaults)
+
+        let result = scheduler.digest(now: date(hour: 13, minute: 0))
+
+        XCTAssertFalse(result)
+        XCTAssertNil(defaults.object(forKey: "lastGlintDate"))
+    }
+
+    func testSchedulerReturnsFalseWhenAlreadyRunToday() {
+        let defaults = freshDefaults()
+        defaults.set(date(hour: 8, minute: 0), forKey: "lastGlintDate")
+        let scheduler = makeScheduler(defaults: defaults)
+
+        let result = scheduler.digest(now: date(hour: 9, minute: 0))
+
+        XCTAssertFalse(result)
+    }
+
+    func testSchedulerReturnsTrueAndSetsFlag() {
+        let defaults = freshDefaults()
+        let scheduler = makeScheduler(defaults: defaults)
+
+        let result = scheduler.digest(now: date(hour: 8, minute: 0))
+
+        XCTAssertTrue(result)
+        XCTAssertNotNil(defaults.object(forKey: "lastGlintDate"))
+    }
+
+    private func makeScheduler(defaults: UserDefaults) -> Scheduler {
+        let cal = calendar(for: 0)
+        return Scheduler(
+            jobRunner: JobRunner(itemStore: MockItemStore(), configStore: MockConfigStore()),
+            calendar: cal,
+            userDefaults: defaults
+        )
+    }
+
+    private func freshDefaults() -> UserDefaults {
+        let name = "test_scheduler_\(UUID().uuidString)"
+        let d = UserDefaults(suiteName: name)!
+        d.removePersistentDomain(forName: name)
+        return d
+    }
+
+    private func date(hour: Int, minute: Int) -> Date {
+        DateComponents(calendar: calendar(for: 0), timeZone: TimeZone(secondsFromGMT: 0), year: 2025, month: 6, day: 15, hour: hour, minute: minute).date!
+    }
+
+    private func calendar(for offset: Int) -> Calendar {
+        var c = Calendar(identifier: .gregorian)
+        c.timeZone = TimeZone(secondsFromGMT: offset)!
+        return c
+    }
+
     func testJobRunnerSkipsDisabledSources() async throws {
         let itemStore = MockItemStore()
         let configStore = MockConfigStore()

@@ -3,10 +3,12 @@ import AppKit
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
+
     let itemStore: ItemStore = UserDefaultsItemStore()
     private let configStore: ConfigStore = UserDefaultsConfigStore()
     private lazy var jobRunner: JobRunner = .init(itemStore: itemStore, configStore: configStore)
-
+    private lazy var scheduler: Scheduler = .init(jobRunner: jobRunner) 
+        
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.image = NSImage(systemSymbolName: "sun.max", accessibilityDescription: "Glint")
@@ -25,26 +27,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         )
     }
 
-    @objc func screenDidWake() {
-        let hour = Calendar.current.component(.hour, from: Date())
-        let totalMinutes = hour * 60 + Calendar.current.component(.minute, from: Date())
-
-        guard (300...660).contains(totalMinutes) else { return }
-
-        let today = Calendar.current.startOfDay(for: Date())
-        if let last = UserDefaults.standard.object(forKey: "lastGlintDate") as? Date,
-           Calendar.current.isDate(last, inSameDayAs: today) {
-            return
-        }
-
-        UserDefaults.standard.set(Date(), forKey: "lastGlintDate")
-
-        Task {
-            await jobRunner.runAll()
-
-            await MainActor.run { [weak self] in
-                self?.showWindow()
-            }
+    @objc private func screenDidWake() {
+        if scheduler.digest() {
+            showWindow()
         }
     }
 
