@@ -6,10 +6,15 @@ let package = Package(
     platforms: [
         .macOS(.v14)
     ],
+    dependencies: [
+        .package(url: "https://github.com/hmlongco/Factory", from: "2.4.0"),
+    ],
     targets: [
         .executableTarget(
             name: "Glint",
-            dependencies: []
+            dependencies: [
+                .product(name: "Factory", package: "Factory"),
+            ]
         ),
         .testTarget(
             name: "GlintTests",

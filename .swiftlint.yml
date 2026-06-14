@@ -1,0 +1,12 @@
+disabled_rules:
+  - force_cast
+  - force_try
+  - line_length
+
+opt_in_rules:
+  - inclusive_language
+  - redundant_optional_initialization
+  - unused_imports
+
+type_name:
+  min_length: 2

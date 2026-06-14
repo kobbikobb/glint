@@ -12,3 +12,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build and test
         run: make build && make test
+      - name: Format lint
+        continue-on-error: true
+        run: make lint-format
+      - name: Lint
+        run: make lint

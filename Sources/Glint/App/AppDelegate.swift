@@ -1,14 +1,11 @@
 import SwiftUI
 import AppKit
+import Factory
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
 
-    let itemStore: ItemStore = UserDefaultsItemStore()
-    private let configStore: ConfigStore = UserDefaultsConfigStore()
-    private lazy var jobRunner: JobRunner = .init(itemStore: itemStore, configStore: configStore)
-    private lazy var scheduler: Scheduler = .init(jobRunner: jobRunner) 
-        
+    @Injected(\.scheduler) private var scheduler
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.image = NSImage(systemSymbolName: "sun.max", accessibilityDescription: "Glint")
