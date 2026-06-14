@@ -23,18 +23,18 @@ Scaffold, menu bar, welcome screen, git, CI, morning unlock detection.
 
 ## Slice 5 — Storage abstraction
 
-- [ ] 5a  Define `Storage` protocol (save/load Items, source configs)
-- [ ] 5b  `UserDefaultsStorage` implementation (zero setup, fast iteration)
-- [ ] 5c  Wire up so all data access goes through the protocol
+- [x] 5a  Define `Storage` protocol (save/load Items, source configs)
+- [x] 5b  `UserDefaultsStorage` implementation (zero setup, fast iteration)
+- [x] 5c  Wire up so all data access goes through the protocol
 
 ## Slice 6 — Guided onboarding (first-run UX)
 
-- [ ] 6a  First launch → full-screen welcome wizard (not empty window)
-- [ ] 6b  Step 1: "Glint helps you start your day informed"
-- [ ] 6c  Step 2: "Connect your first source" (choose Facebook/Google/etc.)
-- [ ] 6d  Step 3: Set trigger time / preferences
-- [ ] 6e  Step 4: "All set — see you tomorrow morning"
-- [ ] 6f  Subsequent launches → normal menu bar app (no wizard)
+- [x] 6a  First launch → full-screen welcome wizard (not empty window)
+- [x] 6b  Step 1: "Glint helps you start your day informed"
+- [x] 6c  Step 2: "Connect your first source" (choose Facebook/Google/etc.)
+- [x] 6d  Step 3: Set trigger time / preferences
+- [x] 6e  Step 4: "All set — see you tomorrow morning"
+- [x] 6f  Subsequent launches → normal menu bar app (no wizard)
 
 ## Slice 7 — Source protocol + job runner
 

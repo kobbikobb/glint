@@ -1,7 +1,17 @@
 import SwiftUI
 
 struct ContentView: View {
+    @AppStorage("hasCompletedOnboarding") private var onboardingDone = false
+
     var body: some View {
+        if onboardingDone {
+            mainView
+        } else {
+            OnboardingView(isComplete: $onboardingDone)
+        }
+    }
+
+    private var mainView: some View {
         VStack(spacing: 16) {
             Spacer()
 
@@ -21,7 +31,7 @@ struct ContentView: View {
             Spacer()
 
             Button("Get Started") {
-                // TODO: Open preferences
+
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
