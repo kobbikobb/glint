@@ -1,0 +1,9 @@
+{
+  "skills": [
+    {
+      "name": "next-slice",
+      "description": "Merge current PR, pull main, branch for the next slice from PLAN.md",
+      "location": ".opencode/skills/next-slice/SKILL.md"
+    }
+  ]
+}

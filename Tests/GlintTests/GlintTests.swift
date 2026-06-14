@@ -7,42 +7,43 @@ final class GlintTests: XCTestCase {
     }
 
     func testJobRunnerRunsSourcesAndSavesItems() async throws {
-        let storage = MockStorage()
+        let itemStore = MockItemStore()
+        let configStore = MockConfigStore()
         let source = MockSource(id: "fb", items: [
             Item(id: "1", sourceId: "fb", title: "Event", summary: nil, date: Date(), url: nil, urgency: .unclassified),
         ])
 
-        let runner = JobRunner(storage: storage)
+        let runner = JobRunner(itemStore: itemStore, configStore: configStore)
         await runner.register(source)
-        try storage.saveSourceConfig(.init(id: "fb", isEnabled: true, authState: .connected, displayName: "FB", filterGroups: [], excludePatterns: []))
+        try configStore.saveSourceConfig(.init(id: "fb", isEnabled: true, authState: .connected, displayName: "FB", filterGroups: [], excludePatterns: []))
 
         await runner.runAll()
 
-        let saved = try storage.items(for: Date())
+        let saved = try itemStore.items(for: Date())
         XCTAssertEqual(saved.count, 1)
         XCTAssertEqual(saved[0].id, "1")
     }
 
     func testJobRunnerSkipsDisabledSources() async throws {
-        let storage = MockStorage()
+        let itemStore = MockItemStore()
+        let configStore = MockConfigStore()
         let source = MockSource(id: "fb", items: [
             Item(id: "1", sourceId: "fb", title: "Event", summary: nil, date: Date(), url: nil, urgency: .unclassified),
         ])
 
-        let runner = JobRunner(storage: storage)
+        let runner = JobRunner(itemStore: itemStore, configStore: configStore)
         await runner.register(source)
-        try storage.saveSourceConfig(.init(id: "fb", isEnabled: false, authState: .connected, displayName: "FB", filterGroups: [], excludePatterns: []))
+        try configStore.saveSourceConfig(.init(id: "fb", isEnabled: false, authState: .connected, displayName: "FB", filterGroups: [], excludePatterns: []))
 
         await runner.runAll()
 
-        let saved = try storage.items(for: Date())
+        let saved = try itemStore.items(for: Date())
         XCTAssertTrue(saved.isEmpty)
     }
 }
 
-private class MockStorage: Storage {
+private class MockItemStore: ItemStore {
     var items: [String: [Item]] = [:]
-    var configs: [SourceConfig] = []
 
     func saveItems(_ items: [Item]) throws {
         let key = itemsKey(for: items.first?.date ?? Date())
@@ -58,6 +59,14 @@ private class MockStorage: Storage {
         items.removeAll()
     }
 
+    private func itemsKey(for date: Date) -> String {
+        ISO8601DateFormatter().string(from: date)
+    }
+}
+
+private class MockConfigStore: ConfigStore {
+    var configs: [SourceConfig] = []
+
     func saveSourceConfig(_ config: SourceConfig) throws {
         if let index = configs.firstIndex(where: { $0.id == config.id }) {
             configs[index] = config
@@ -72,10 +81,6 @@ private class MockStorage: Storage {
 
     func deleteSourceConfig(id: String) throws {
         configs.removeAll { $0.id == id }
-    }
-
-    private func itemsKey(for date: Date) -> String {
-        ISO8601DateFormatter().string(from: date)
     }
 }
 

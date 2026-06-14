@@ -7,7 +7,7 @@ struct GlintApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView(storage: appDelegate.storage)
+            ContentView(itemStore: appDelegate.itemStore)
         }
         .windowResizability(.contentSize)
     }
@@ -15,8 +15,9 @@ struct GlintApp: App {
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
-    let storage: Storage = UserDefaultsStorage()
-    private lazy var jobRunner: JobRunner = .init(storage: storage)
+    let itemStore: ItemStore = UserDefaultsItemStore()
+    private let configStore: ConfigStore = UserDefaultsConfigStore()
+    private lazy var jobRunner: JobRunner = .init(itemStore: itemStore, configStore: configStore)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
