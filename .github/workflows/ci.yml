@@ -10,5 +10,12 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
+      - name: Install tools
+        run: brew install swiftlint swift-format
       - name: Build and test
         run: make build && make test
+      - name: Format lint
+        continue-on-error: true
+        run: make lint-format
+      - name: Lint
+        run: make lint
