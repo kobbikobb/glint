@@ -13,7 +13,7 @@ final class GlintTests: XCTestCase {
         ])
 
         let runner = JobRunner(storage: storage)
-        runner.register(source)
+        await runner.register(source)
         try storage.saveSourceConfig(.init(id: "fb", isEnabled: true, authState: .connected, displayName: "FB", filterGroups: [], excludePatterns: []))
 
         await runner.runAll()
@@ -30,7 +30,7 @@ final class GlintTests: XCTestCase {
         ])
 
         let runner = JobRunner(storage: storage)
-        runner.register(source)
+        await runner.register(source)
         try storage.saveSourceConfig(.init(id: "fb", isEnabled: false, authState: .connected, displayName: "FB", filterGroups: [], excludePatterns: []))
 
         await runner.runAll()
