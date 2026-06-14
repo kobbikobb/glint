@@ -1,45 +1,45 @@
 import AppKit
 
 class Scheduler {
+    private let jobRunner: JobRunner
+    private let calendar: Calendar
+    private let userDefaults: UserDefaults
 
-    private let jobRunner: JobRunner 
-   
-    init(jobRunner: JobRunner) {
+    init(jobRunner: JobRunner, calendar: Calendar = .current, userDefaults: UserDefaults = .standard) {
         self.jobRunner = jobRunner
+        self.calendar = calendar
+        self.userDefaults = userDefaults
     }
 
     @objc func screenDidWakeUp() -> Bool {
-        guard (isMorning() && !hasRunToday()) else { return false}
+        digest(now: Date())
+    }
+
+    func digest(now: Date = Date()) -> Bool {
+        guard isMorning(now: now) && !hasRunToday(now: now) else { return false }
 
         Task {
             await jobRunner.runAll()
         }
-       
-        setHasRunToday()
 
+        setHasRunToday(now: now)
         return true
     }
 
-    @objc private func isMorning() -> Bool {
-        let startOfMorningMinutesFromMidnight = 60 * 5
-        let endOfMorningMinutesFromMidnight = 60 * 11
-
-        let currentHour = Calendar.current.component(.hour, from: Date())
-        let currentMinutesFromMidnite = currentHour * 60 + Calendar.current.component(.minute, from: Date())
-
-        return (startOfMorningMinutesFromMidnight...endOfMorningMinutesFromMidnight).contains(currentMinutesFromMidnite)
+    private func isMorning(now: Date) -> Bool {
+        let start = 60 * 5
+        let end = 60 * 11
+        let minutes = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
+        return (start...end).contains(minutes)
     }
 
-    @objc private func hasRunToday() -> Bool {
-        let today = Calendar.current.startOfDay(for: Date())
-        if let last = UserDefaults.standard.object(forKey: "lastGlintDate") as? Date,
-           Calendar.current.isDate(last, inSameDayAs: today) {
-            return true
-        }
-        return false
+    private func hasRunToday(now: Date) -> Bool {
+        let today = calendar.startOfDay(for: now)
+        guard let last = userDefaults.object(forKey: "lastGlintDate") as? Date else { return false }
+        return calendar.isDate(last, inSameDayAs: today)
     }
 
-    @objc private func setHasRunToday() {
-        UserDefaults.standard.set(Date(), forKey: "lastGlintDate")
+    private func setHasRunToday(now: Date) {
+        userDefaults.set(now, forKey: "lastGlintDate")
     }
 }
