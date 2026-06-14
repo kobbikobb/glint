@@ -2,6 +2,10 @@ disabled_rules:
   - force_cast
   - force_try
   - line_length
+  - trailing_comma
+  - statement_position
+  - for_where
+  - identifier_name
 
 opt_in_rules:
   - inclusive_language
@@ -10,3 +14,6 @@ opt_in_rules:
 
 type_name:
   min_length: 2
+
+excluded:
+  - .build
