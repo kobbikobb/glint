@@ -54,4 +54,5 @@ If you can't describe how to validate a step, the plan isn't complete.
 - **One PR per slice** — keep changes small and reviewable.
 - **Update PLAN.md as you go** — check off items, note blockers.
 - **Documentation changes are code changes** — VISION, ARCHITECTURE, PLAN are part of the source.
+- **Never merge a PR** — create it, push it, link it, notify. The user merges on GitHub.
 - **When in doubt, refer to CLAUDE.md** — code style, comment rules, etc.
