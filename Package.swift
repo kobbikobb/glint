@@ -10,6 +10,10 @@ let package = Package(
         .executableTarget(
             name: "Glint",
             dependencies: []
+        ),
+        .testTarget(
+            name: "GlintTests",
+            dependencies: ["Glint"]
         )
     ]
 )

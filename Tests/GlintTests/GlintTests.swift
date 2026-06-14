@@ -1,5 +1,8 @@
-import Testing
+@testable import Glint
+import XCTest
 
-@Test func appLaunches() {
-    // Placeholder — will be replaced with real tests
+final class GlintTests: XCTestCase {
+    func testPlaceholder() {
+        XCTAssertTrue(true)
+    }
 }
