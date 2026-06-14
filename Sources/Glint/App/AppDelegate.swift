@@ -21,10 +21,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         NSWorkspace.shared.notificationCenter.addObserver(
             self,
-            selector: #selector(scheduler.screenDidWakeUp),
+            selector: #selector(screenDidWake),
             name: NSWorkspace.didWakeNotification,
             object: nil
         )
+    }
+
+    @objc private func screenDidWake() {
+        if scheduler.digest() {
+            showWindow()
+        }
     }
 
     @objc func showWindow() {
