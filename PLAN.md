@@ -50,7 +50,7 @@ _Establish correct seams before adding real sources._
 - [x] 7.5a  Split `Storage` into `ItemStore` + `ConfigStore` protocols, separate implementations
 - [x] 7.5b  Extract `AppDelegate` from `GlintApp.swift` into `App/AppDelegate.swift`
 - [x] 7.5c  Extract `Scheduler` from `AppDelegate` into `Gleaner/Scheduler.swift`
-- [ ] 7.5d  Create `Services/DigestService.swift` — UI-facing load/classify/group (ContentView stops importing Storage)
+- [x] 7.5d  Create `Services/DigestService.swift` — UI-facing load/classify/group (ContentView stops importing Storage)
 - [ ] 7.5e  Create `Agent/Classifier.swift` protocol + `Agent/NoopClassifier.swift` placeholder
 - [ ] 7.5f  Add CI guardrails: import-boundary checks, directory-structure check, dead-symbol detection
 - [ ] 7.5g  Move `ContentView.swift` → `UI/PopupView.swift`, restructure directories to match target layout

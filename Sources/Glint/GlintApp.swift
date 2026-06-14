@@ -5,11 +5,11 @@ import Factory
 @main
 struct GlintApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @Injected(\.itemStore) private var itemStore
+    @Injected(\.digestService) private var digest
 
     var body: some Scene {
         WindowGroup {
-            ContentView(itemStore: itemStore)
+            ContentView(digest: digest)
         }
         .windowResizability(.contentSize)
     }
