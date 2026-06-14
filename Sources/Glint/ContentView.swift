@@ -2,16 +2,23 @@ import SwiftUI
 
 struct ContentView: View {
     @AppStorage("hasCompletedOnboarding") private var onboardingDone = false
+    let storage: Storage
+
+    @State private var items: [Item] = []
 
     var body: some View {
         if onboardingDone {
-            mainView
+            if items.isEmpty {
+                welcomeView
+            } else {
+                itemsListView
+            }
         } else {
             OnboardingView(isComplete: $onboardingDone)
         }
     }
 
-    private var mainView: some View {
+    private var welcomeView: some View {
         VStack(spacing: 16) {
             Spacer()
 
@@ -40,5 +47,28 @@ struct ContentView: View {
         }
         .padding(40)
         .frame(width: 420, height: 320)
+    }
+
+    private var itemsListView: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 12) {
+                Text("Good morning ☀️")
+                    .font(.title)
+                    .bold()
+
+                ForEach(items) { item in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(item.title)
+                            .font(.headline)
+                        if let summary = item.summary {
+                            Text(summary)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+            .padding(20)
+        }
+        .frame(width: 420, height: 500)
     }
 }

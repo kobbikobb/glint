@@ -7,7 +7,7 @@ struct GlintApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(storage: appDelegate.storage)
         }
         .windowResizability(.contentSize)
     }
@@ -15,6 +15,8 @@ struct GlintApp: App {
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
+    let storage: Storage = UserDefaultsStorage()
+    private lazy var jobRunner: JobRunner = .init(storage: storage)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -46,9 +48,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 60) { [weak self] in
-            UserDefaults.standard.set(Date(), forKey: "lastGlintDate")
-            self?.showWindow()
+        UserDefaults.standard.set(Date(), forKey: "lastGlintDate")
+
+        Task {
+            await jobRunner.runAll()
+
+            await MainActor.run { [weak self] in
+                self?.showWindow()
+            }
         }
     }
 
