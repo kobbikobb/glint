@@ -47,7 +47,7 @@ Scaffold, menu bar, welcome screen, git, CI, morning unlock detection.
 
 _Establish correct seams before adding real sources._
 
-- [ ] 7.5a  Split `Storage` into `ItemStore` + `ConfigStore` protocols, separate implementations
+- [x] 7.5a  Split `Storage` into `ItemStore` + `ConfigStore` protocols, separate implementations
 - [ ] 7.5b  Extract `AppDelegate` from `GlintApp.swift` into `App/AppDelegate.swift`
 - [ ] 7.5c  Extract `Scheduler` from `AppDelegate` into `Gleaner/Scheduler.swift`
 - [ ] 7.5d  Create `Services/DigestService.swift` — UI-facing load/classify/group (ContentView stops importing Storage)
