@@ -1,14 +1,1 @@
-{
-  "skills": [
-    {
-      "name": "next-slice",
-      "description": "Merge current PR, pull main, branch for the next slice from PLAN.md, then hand off to /manual",
-      "location": ".opencode/skills/next-slice/SKILL.md"
-    },
-    {
-      "name": "manual",
-      "description": "Guide the user through a slice one mission at a time — present, implement, verify, commit",
-      "location": ".opencode/skills/manual/SKILL.md"
-    }
-  ]
-}
+{}
