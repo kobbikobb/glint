@@ -61,26 +61,56 @@ protocol Source {
 | Facebook | Graph API (REST) | OAuth 2.0 | Group events only |
 | (future) Slack | Slack API | OAuth | Highlights |
 
-## Data flow (morning trigger)
+## Data flow — principle
+
+**Popup never calls external APIs.** Fetching and display are decoupled. The popup reads exclusively from local storage.
+
+### Configure (once)
 
 ```
-User unlocks Mac
+User sets up sources in Settings
+  ├─ Facebook (OAuth)
+  ├─ Google Calendar (OAuth)
+  ├─ Outlook (OAuth)
+  └─ Gmail (OAuth)
+        │
+        ▼
+Source configs + tokens persisted to Storage protocol
+(UserDefaultsStorage → later SQLiteStorage)
+```
+
+### Run (daily, background)
+
+```
+Scheduler fires (activity trigger or time-based)
        │
        ▼
-Scheduler fires (1 min delay)
+JobRunner iterates configured Sources
+  ├─ FacebookSource.fetch()  ──► Items
+  ├─ GoogleCalendarSource.fetch() ──► Items
+  ├─ OutlookSource.fetch()   ──► Items
+  └─ GmailSource.fetch()     ──► Items
        │
        ▼
-Gleaner fetches from each connected Source
+Items stored in Storage (dedup by source + id)
        │
        ▼
-Items cached in SQLite (dedup + diff from yesterday)
+If LLM enabled → classify items via Ollama (optional enhancement)
+```
+
+### Display (instant)
+
+```
+Popup opens
        │
        ▼
-If LLM enabled → send items to Ollama for classification
-If LLM disabled → apply rule-based filters (recurring, group prefs)
+Read Items from Storage (today's items, already cached)
        │
        ▼
-Assemble popup content (grouped by urgency / category)
+Apply rule-based filters (recurring, group prefs)
+       │
+       ▼
+Group by urgency / category
        │
        ▼
 Show NSWindow popup (auto-dismiss after N seconds)
@@ -94,11 +124,12 @@ Show NSWindow popup (auto-dismiss after N seconds)
 
 ## Key architectural decisions
 
-1. **Plugin sources via protocol** — adding a new source means writing one struct. No core changes.
-2. **Rule-based fallback** — app works fully without an LLM. LLM is a quality-of-life upgrade.
-3. **SQLite cache** — prevents re-fetching if user sees the popup twice, and enables offline summary.
-4. **No cloud** — every component runs on-device. Future optional cloud-LLM is an upgrade path.
-5. **OAuth tokens in Keychain** — standard macOS security practice.
+1. **Fetch/display decoupling** — popup never calls APIs. Sources run as background jobs. Popup reads from cache. Instant, offline-capable.
+2. **Storage protocol** — data access behind an interface. Use `UserDefaultsStorage` for prototyping, swap to `SQLiteStorage` later with zero code changes.
+3. **Plugin sources via protocol** — adding a new source means writing one struct implementing `Source`. No core changes.
+4. **Rule-based fallback** — app works fully without an LLM. LLM is a quality-of-life upgrade.
+5. **No cloud** — everything runs on-device. Future optional cloud-LLM is an upgrade path.
+6. **OAuth tokens in Keychain** — standard macOS security practice.
 
 ## File layout (projected)
 

@@ -1,115 +1,127 @@
 # Glint — Build Plan
 
-## Slice 1 — Scaffold + Welcome screen
+## Architecture principle
 
-- [ ] 1a  Create Xcode project, `GlintApp.swift` with @main, empty window
-- [ ] 1b  Add NSStatusBar menu bar icon
-- [ ] 1c  Click icon → NSWindow with SwiftUI content view
-- [ ] 1d  Window shows "Welcome to Glint" + "Get Started" button
-- [ ] 1e  Quit menu item works
+```
+Configure (settings UI)    Run (background jobs)       Display (from cache)
+─────────────────────      ──────────────────────      ─────────────────────
+  ● Add source               Scheduler fires             Popup reads local DB
+  ● OAuth auth               ├─ Source A fetch job       shows today's items
+  ● Set filters              ├─ Source B fetch job
+                             └─ Source C fetch job
+                                    │
+                                    ▼
+                               Local DB
+                            (single source of truth)
+```
 
-## Slice 2 — Git
+Popups never call APIs. Everything is pre-fetched and cached.
 
-- [ ] 2a  `git init` + `.gitignore` for Xcode/Swift
-- [ ] 2b  First commit
-- [ ] 2c  GitHub repo created (`glint/glint`), push
+## ✅ Slice 1–4 — Done
 
-## Slice 3 — CI pipeline
+Scaffold, menu bar, welcome screen, git, CI, morning unlock detection.
 
-- [ ] 3a  `.github/workflows/ci.yml` — builds on push
-- [ ] 3b  Green checkmark on commit
+## Slice 5 — Storage abstraction
 
-## Slice 4 — Activity detection
+- [ ] 5a  Define `Storage` protocol (save/load Items, source configs)
+- [ ] 5b  `UserDefaultsStorage` implementation (zero setup, fast iteration)
+- [ ] 5c  Wire up so all data access goes through the protocol
 
-- [ ] 4a  Listen for screen unlock (`NSWorkspace.didWakeNotification`)
-- [ ] 4b  Track if this is the first unlock after 05:00–11:00 today
-- [ ] 4c  Wait 1 minute, then open the popup window
+## Slice 6 — Guided onboarding (first-run UX)
 
-## Slice 5 — Facebook OAuth
+- [ ] 6a  First launch → full-screen welcome wizard (not empty window)
+- [ ] 6b  Step 1: "Glint helps you start your day informed"
+- [ ] 6c  Step 2: "Connect your first source" (choose Facebook/Google/etc.)
+- [ ] 6d  Step 3: Set trigger time / preferences
+- [ ] 6e  Step 4: "All set — see you tomorrow morning"
+- [ ] 6f  Subsequent launches → normal menu bar app (no wizard)
 
-- [ ] 5a  Register Facebook app, configure OAuth redirect URI
-- [ ] 5b  Implement OAuth flow: open browser → receive token
-- [ ] 5c  Store token in Keychain
-- [ ] 5d  UI: "Connect Facebook" button, connected/disconnected state
+## Slice 7 — Source protocol + job runner
 
-## Slice 6 — Facebook events
+- [ ] 7a  Refine `Source` protocol: `func fetch() async throws -> [Item]`
+- [ ] 7b  `JobRunner` — runs each configured source, stores results in DB
+- [ ] 7c  Scheduler calls `JobRunner` on morning trigger (instead of showing popup directly)
+- [ ] 7d  Popup reads from DB after jobs complete
 
-- [ ] 6a  Fetch upcoming group events via Graph API
-- [ ] 6b  Parse into `Item` model
-- [ ] 6c  Display events in the popup window
+## Slice 8 — Facebook OAuth
 
-## Slice 7 — Rule-based filter
+- [ ] 8a  Register Facebook app, configure OAuth redirect URI
+- [ ] 8b  OAuth flow: open browser → receive token → store in Keychain
+- [ ] 8c  "Connect Facebook" UI in settings, connected/disconnected state
+- [ ] 8d  Token stored via Keychain (Storage protocol for secrets)
 
-- [ ] 7a  Per-source config model (include/exclude lists)
-- [ ] 7b  Basic filter: hide recurring meetings by title pattern
-- [ ] 7c  Facebook filter: show events only from selected groups
-- [ ] 7d  Filtered items → popup (no LLM needed)
+## Slice 9 — Facebook events (first real data)
 
-## Slice 8 — Google Calendar
+- [ ] 9a  `FacebookSource` implements `Source` protocol
+- [ ] 9b  Fetch upcoming group events via Graph API
+- [ ] 9c  Parse into `Item` model
+- [ ] 9d  Stored in DB → displayed in popup
+- [ ] 9e  Milestone: first end-to-end flow (Facebook → DB → popup)
 
-- [ ] 8a  Google Cloud project + Calendar API enabled + OAuth setup
-- [ ] 8b  OAuth flow → token in Keychain
-- [ ] 8c  Fetch today's events
-- [ ] 8d  Display alongside Facebook events in popup
+## Slice 10 — Google Calendar
 
-## Slice 9 — Outlook calendar
+- [ ] 10a  Google Cloud project + Calendar API enabled + OAuth setup
+- [ ] 10b  OAuth flow → token in Keychain
+- [ ] 10c  `GoogleCalendarSource` implements `Source`
+- [ ] 10d  Display alongside Facebook in popup
 
-- [ ] 9a  Azure app registration + Microsoft Graph API + OAuth setup
-- [ ] 9b  OAuth flow → token in Keychain
-- [ ] 9c  Fetch today's events
-- [ ] 9d  Display in popup
+## Slice 11 — Outlook calendar
 
-## Slice 10 — Gmail
+- [ ] 11a  Azure app registration + Microsoft Graph API + OAuth setup
+- [ ] 11b  OAuth flow → token in Keychain
+- [ ] 11c  `OutlookCalendarSource` implements `Source`
+- [ ] 11d  Display in popup
 
-- [ ] 10a  Google Cloud project + Gmail API + OAuth setup
-- [ ] 10b  Fetch recent inbox (last 24h)
-- [ ] 10c  Basic urgency keywords (deadline, urgent, EOD, etc.)
-- [ ] 10d  Display in popup
+## Slice 12 — Gmail
 
-## Slice 11 — LLM integration
+- [ ] 12a  Google Cloud project + Gmail API + OAuth setup
+- [ ] 12b  Fetch recent inbox (last 24h)
+- [ ] 12c  Basic urgency keywords (deadline, urgent, EOD, etc.)
+- [ ] 12d  Display in popup
 
-- [ ] 11a  Detect Ollama running on localhost:11434
-- [ ] 11b  Send items for classification via OpenAI-compatible API
-- [ ] 11c  Parse response into urgent / important / noise
-- [ ] 11d  Fallback gracefully if Ollama is not running
+## Slice 13 — Rule-based filters
 
-## Slice 12 — LLM narrative summary
+- [ ] 13a  Per-source filter config model (include/exclude lists)
+- [ ] 13b  Basic filter: hide recurring meetings by title pattern
+- [ ] 13c  Facebook filter: show events only from selected groups
+- [ ] 13d  Filtered items → popup (no LLM needed)
 
-- [ ] 12a  Send all items + classification to LLM for narrative
-- [ ] 12b  Display "Here's what matters today" paragraph in popup
+## Slice 14 — LLM integration
 
-## Slice 13 — Popup polish
+- [ ] 14a  Detect Ollama running on localhost:11434
+- [ ] 14b  Send items for classification via OpenAI-compatible API
+- [ ] 14c  Parse response into urgent / important / noise
+- [ ] 14d  Fallback gracefully if Ollama is not running
 
-- [ ] 13a  Slide-in animation
-- [ ] 13b  Auto-dismiss after N seconds (configurable)
-- [ ] 13c  Snooze button (dismiss + retry in 10 min)
-- [ ] 13d  Dark mode support
+## Slice 15 — LLM narrative summary
 
-## Slice 14 — Preferences window
+- [ ] 15a  Send all items + classification to LLM for narrative
+- [ ] 15b  Display "Here's what matters today" paragraph in popup
 
-- [ ] 14a  Source connection management (add/remove/re-auth)
-- [ ] 14b  Per-source filter settings
-- [ ] 14c  LLM toggle + model selection
-- [ ] 14d  Trigger time window configuration
-- [ ] 14e  General settings bindings → persisted
+## Slice 16 — Popup polish
 
-## Slice 15 — SQLite cache
+- [ ] 16a  Slide-in animation
+- [ ] 16b  Auto-dismiss after N seconds (configurable)
+- [ ] 16c  Snooze button (dismiss + retry in 10 min)
+- [ ] 16d  Dark mode support
 
-- [ ] 15a  GRDB setup
-- [ ] 15b  Cache fetched items (dedup by source + id)
-- [ ] 15c  Serve from cache if less than 15 min stale
-- [ ] 15d  Clear cache on new day
+## Slice 17 — SQLite (GRDB)
 
-## Slice 16 — Release pipeline
+- [ ] 17a  Add GRDB dependency
+- [ ] 17b  `SQLiteStorage` implements `Storage` protocol
+- [ ] 17c  Migrate from `UserDefaultsStorage`
+- [ ] 17d  Add change notifications / hooks for downstream consumers
 
-- [ ] 16a  Code signing setup (Developer ID Application)
-- [ ] 16b  Notarization step in CI
-- [ ] 16c  `.app.zip` artifact on GitHub Release
-- [ ] 16d  Release workflow runs on `git tag v*`
+## Slice 18 — Release pipeline
 
-## Slice 17 — Homebrew tap
+- [ ] 18a  Code signing (Developer ID Application)
+- [ ] 18b  Notarization in CI
+- [ ] 18c  `.app.zip` artifact on GitHub Release
+- [ ] 18d  Release workflow on `git tag v*`
 
-- [ ] 17a  Create `glint/homebrew-tap` repo
-- [ ] 17b  Write `Formula/glint.rb` with versioned URL + checksum
-- [ ] 17c  CI auto-updates formula on new release
-- [ ] 17d  `brew tap glint/tap && brew install glint` works
+## Slice 19 — Homebrew tap
+
+- [ ] 19a  Create `glint/homebrew-tap` repo
+- [ ] 19b  Write `Formula/glint.rb` with versioned URL + checksum
+- [ ] 19c  CI auto-updates formula on new release
+- [ ] 19d  `brew tap glint/tap && brew install glint` works
