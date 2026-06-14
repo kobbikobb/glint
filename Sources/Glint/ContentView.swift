@@ -2,19 +2,26 @@ import SwiftUI
 
 struct ContentView: View {
     @AppStorage("hasCompletedOnboarding") private var onboardingDone = false
-    let storage: Storage
+    let itemStore: ItemStore
 
     @State private var items: [Item] = []
 
     var body: some View {
-        if onboardingDone {
-            if items.isEmpty {
-                welcomeView
+        Group {
+            if onboardingDone {
+                if items.isEmpty {
+                    welcomeView
+                } else {
+                    itemsListView
+                }
             } else {
-                itemsListView
+                OnboardingView(isComplete: $onboardingDone)
             }
-        } else {
-            OnboardingView(isComplete: $onboardingDone)
+        }
+        .task {
+            if onboardingDone {
+                items = (try? itemStore.items(for: Date())) ?? []
+            }
         }
     }
 
