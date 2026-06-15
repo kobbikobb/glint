@@ -55,4 +55,8 @@ If you can't describe how to validate a step, the plan isn't complete.
 - **Update PLAN.md as you go** — check off items, note blockers.
 - **Documentation changes are code changes** — VISION, ARCHITECTURE, PLAN are part of the source.
 - **Every change goes through a human.** Create a PR, push it, link it. A human reviews it. A human merges it. The AI never merges.
-- **When in doubt, refer to CLAUDE.md** — code style, comment rules, etc.
+- **PRs must follow the template** at `.github/PULL_REQUEST_TEMPLATE.md` — fill in Problem, Solution, Files of note sections.
+- **PRs must add a label**: `bug`, `enhancement`, or `upgrade`.
+- **No comments unless WHY is non-obvious** — never restate code, never narrate plans.
+- **Lean over clever** — less code is better than more abstraction.
+- **Match existing patterns** — naming, file structure, imports, idioms.

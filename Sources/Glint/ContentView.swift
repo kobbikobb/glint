@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @AppStorage("hasCompletedOnboarding") private var onboardingDone = false
-    let itemStore: ItemStore
+    let digest: DigestService
 
     @State private var items: [Item] = []
 
@@ -20,7 +20,7 @@ struct ContentView: View {
         }
         .task {
             if onboardingDone {
-                items = (try? itemStore.items(for: Date())) ?? []
+                items = digest.loadToday()
             }
         }
     }
