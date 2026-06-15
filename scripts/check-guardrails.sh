@@ -24,7 +24,7 @@ done
 
 while IFS= read -r f; do
   fail "Unexpected file at Sources/Glint/ root: $(basename "$f") (should move to subdirectory)"
-done < <(find Sources/Glint -maxdepth 1 -name "*.swift" ! -name "GlintApp.swift" ! -name "ContentView.swift")
+done < <(find Sources/Glint -maxdepth 1 -name "*.swift")
 
 # ── 2. Unreferenced dependencies ────────────────────
 info "[deps] Checking for unreferenced Package.swift dependencies..."

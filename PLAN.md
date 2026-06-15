@@ -52,8 +52,8 @@ _Establish correct seams before adding real sources._
 - [x] 7.5c  Extract `Scheduler` from `AppDelegate` into `Gleaner/Scheduler.swift`
 - [x] 7.5d  Create `Services/DigestService.swift` — UI-facing load/classify/group (ContentView stops importing Storage)
 - [x] 7.5e  Create `Agent/Classifier.swift` protocol + `Agent/NoopClassifier.swift` placeholder
-- [ ] 7.5f  Add CI guardrails: import-boundary checks, directory-structure check, dead-symbol detection (DoD: introduce deliberate violation, verify CI failure, revert)
-- [ ] 7.5g  Move `ContentView.swift` → `UI/PopupView.swift`, restructure directories to match target layout
+- [x] 7.5f  Add CI guardrails: import-boundary checks, directory-structure check, dead-symbol detection (DoD: introduce deliberate violation, verify CI failure, revert)
+- [x] 7.5g  Move `ContentView.swift` → `UI/PopupView.swift`, restructure directories to match target layout
 
 ## Slice 8 — Facebook OAuth
 

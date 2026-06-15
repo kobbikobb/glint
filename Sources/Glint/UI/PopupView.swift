@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ContentView: View {
+struct PopupView: View {
     @AppStorage("hasCompletedOnboarding") private var onboardingDone = false
     let digest: DigestService
 
