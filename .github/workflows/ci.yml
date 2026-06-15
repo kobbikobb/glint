@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install tools
-        run: brew install swiftlint swift-format
+        run: brew install swiftlint swift-format periphery
       - name: Build and test
         run: make build && make test
       - name: Format lint
@@ -19,5 +19,7 @@ jobs:
         run: make lint-format
       - name: Guardrails
         run: make check-guardrails
+      - name: Dead-code scan
+        run: make check-deadcode
       - name: Lint
         run: make lint

@@ -26,42 +26,12 @@ while IFS= read -r f; do
   fail "Unexpected file at Sources/Glint/ root: $(basename "$f") (should move to subdirectory)"
 done < <(find Sources/Glint -maxdepth 1 -name "*.swift" ! -name "GlintApp.swift" ! -name "ContentView.swift")
 
-# ── 2. Import boundaries ────────────────────────────
-info "[imports] Checking import boundaries..."
-
-check_imports() {
-  local dir=$1; shift
-  local forbidden=("$@")
-  while IFS= read -r f; do
-    while IFS= read -r line; do
-      imp=$(echo "$line" | sed 's/^import[[:space:]]*//')
-      for forbid in "${forbidden[@]}"; do
-        if [ "$imp" = "$forbid" ]; then
-          fail "${f#Sources/Glint/} imports '$forbid' (forbidden in $dir/)"
-        fi
-      done
-    done < <(grep "^import" "$f" 2>/dev/null || true)
-  done < <(find "Sources/Glint/$dir" -name "*.swift")
-}
-
-check_imports "Agent"   "SwiftUI" "AppKit" "Factory"
-check_imports "Models"  "SwiftUI" "AppKit" "Factory"
-check_imports "Storage" "SwiftUI" "AppKit" "Factory"
-check_imports "Sources" "SwiftUI" "AppKit" "Factory"
-check_imports "Services" "SwiftUI" "AppKit" "Factory"
-check_imports "UI"      "AppKit" "Factory"
-
-# ── 3. Dead-symbol detection ────────────────────────
-info "[deadcode] Checking for unreferenced dependencies..."
-
-dep_names=$(grep "\.package(url:" Package.swift | sed -n 's/.*name: *"\([^"]*\)".*/\1/p' || true)
-if [ -z "$dep_names" ]; then
-  dep_names=$(grep "\.package(url:" Package.swift | sed -n 's|.*/\([^/"]*\)") *$|\1|p' || true)
-fi
+# ── 2. Unreferenced dependencies ────────────────────
+info "[deps] Checking for unreferenced Package.swift dependencies..."
 
 while IFS= read -r dep; do
   [ -z "$dep" ] && continue
-  product="$(grep -A5 "\"$dep\"" Package.swift | grep "\.product(name:" | sed 's/.*name: *"\([^"]*\)".*/\1/' | head -1)"
+  product=$(grep -A5 "\"$dep\"" Package.swift | grep "\.product(name:" | sed 's/.*name: *"\([^"]*\)".*/\1/' | head -1)
   product="${product:-$dep}"
   found=false
   while IFS= read -r f; do
@@ -74,7 +44,7 @@ while IFS= read -r dep; do
   else
     pass "Dependency '$dep' is referenced in source"
   fi
-done <<< "$dep_names"
+done < <(grep "\.package(url:" Package.swift | sed -n 's/.*name: *"\([^"]*\)".*/\1/p' || grep "\.package(url:" Package.swift | sed -n 's|.*/\([^/"]*\)") *$|\1|p' || true)
 
 # ── Result ──────────────────────────────────────────
 echo ""

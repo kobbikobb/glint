@@ -22,4 +22,7 @@ lint-format:
 check-guardrails:
 	scripts/check-guardrails.sh
 
-.PHONY: build test clean run lint format lint-format check-guardrails
+check-deadcode:
+	periphery scan
+
+.PHONY: build test clean run lint format lint-format check-guardrails check-deadcode
