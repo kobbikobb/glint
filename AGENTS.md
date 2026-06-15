@@ -13,10 +13,13 @@ Every change goes through: **Plan → Challenge → Implement → Validate**
 │  2. Challenge                                     │
 │     Read existing code + docs.                    │
 │     Stress-test the plan before writing code:     │
-│     • Does this contradict ARCHITECTURE.md?       │
-│     • Are there edge cases not handled?           │
-│     • Is there a simpler way?                     │
-│     • Does the DoD actually prove completion?     │
+    │     • Does this contradict ARCHITECTURE.md?       │
+    │     • Does every new type connect to something —  │
+    │       no dead-code islands?                       │
+    │     • Are there edge cases not handled?           │
+    │     • Is there a simpler way?                     │
+    │     • Does the DoD actually prove completion?     │
+    │       ("build passes" is not proof for logic)     │
 │     Raise issues. Resolve before moving on.       │
 ├──────────────────────────────────────────────────┤
 │  3. Implement                                     │

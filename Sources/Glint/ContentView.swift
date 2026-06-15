@@ -20,7 +20,7 @@ struct ContentView: View {
         }
         .task {
             if onboardingDone {
-                items = digest.loadToday()
+                items = await digest.loadToday()
             }
         }
     }
