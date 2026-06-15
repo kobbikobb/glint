@@ -19,4 +19,10 @@ format:
 lint-format:
 	swift-format lint --recursive Sources Tests
 
-.PHONY: build test clean run lint format lint-format
+check-guardrails:
+	scripts/check-guardrails.sh
+
+check-deadcode:
+	periphery scan
+
+.PHONY: build test clean run lint format lint-format check-guardrails check-deadcode

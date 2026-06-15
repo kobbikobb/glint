@@ -12,6 +12,24 @@ opt_in_rules:
   - redundant_optional_initialization
   - unused_imports
 
+custom_rules:
+  no_ui_framework_imports:
+    name: "Data-layer directories must not import UI frameworks"
+    regex: '^import (SwiftUI|AppKit|Factory)$'
+    included:
+      - Sources/Glint/Models
+      - Sources/Glint/Storage
+      - Sources/Glint/Sources
+      - Sources/Glint/Services
+      - Sources/Glint/Agent
+    severity: error
+  ui_no_appkit_or_factory:
+    name: "UI must not import AppKit or Factory directly"
+    regex: '^import (AppKit|Factory)$'
+    included:
+      - Sources/Glint/UI
+    severity: error
+
 type_name:
   min_length: 2
 
