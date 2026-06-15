@@ -9,7 +9,7 @@ struct GlintApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView(digest: digest)
+            PopupView(digest: digest)
         }
         .windowResizability(.contentSize)
     }
