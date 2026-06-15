@@ -28,15 +28,19 @@ description: >
    - Derive branch name from the slice: lowercase, replace spaces with hyphens
    - `git checkout -b <branch-name>`
 
-5. **Pick a random phrase**
-   Choose from:
-   - "Now it's time for you to do the hard work."
-   - "Your keyboard awaits."
-   - "The plan is set — the rest is typing."
-   - "Take it from here."
-   - "This is where you earn your coffee."
+5. **Decide mode (~10% manual, ~90% direct)**
+   - Roll a random number 1–100: `echo $(( RANDOM % 100 + 1 ))`.
+   - If ≤ 10: drop into **manual mode** (step 6).
+   - Otherwise: **direct mode** — implement the slice yourself, commit, push, create PR with the template, add label, and report the URL. Skip step 6.
+   - Exception: if the slice involves real credentials, API keys, or external account setup (e.g. "Register Facebook app"), always pick manual mode.
 
-6. **Start guided implementation**
+6. **Manual mode (guided implementation)**
+   - Pick a random phrase:
+     - "Now it's time for you to do the hard work."
+     - "Your keyboard awaits."
+     - "The plan is set — the rest is typing."
+     - "Take it from here."
+     - "This is where you earn your coffee."
    - Follow the workflow defined in `.opencode/skills/manual/SKILL.md` — split into missions, present one at a time, wait for `/verify`, etc.
    - Do NOT ask the user to load `/manual` as a skill. The manual flow is part of this session now.
    - Tell the user the slice number and title, then present the first mission.
