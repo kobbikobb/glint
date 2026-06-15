@@ -19,4 +19,7 @@ format:
 lint-format:
 	swift-format lint --recursive Sources Tests
 
-.PHONY: build test clean run lint format lint-format
+check-guardrails:
+	scripts/check-guardrails.sh
+
+.PHONY: build test clean run lint format lint-format check-guardrails

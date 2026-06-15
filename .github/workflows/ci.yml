@@ -17,5 +17,7 @@ jobs:
       - name: Format lint
         continue-on-error: true
         run: make lint-format
+      - name: Guardrails
+        run: make check-guardrails
       - name: Lint
         run: make lint
