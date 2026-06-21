@@ -32,7 +32,7 @@ description: >
    - Roll a random number 1–100: `echo $(( RANDOM % 100 + 1 ))`.
    - If ≤ 10: drop into **manual mode** (step 6).
    - Otherwise: **direct mode** — implement the slice yourself, commit, push, create PR with the template, add label, and report the URL. Skip step 6.
-   - Exception: if the slice involves real credentials, API keys, or external account setup (e.g. "Register Facebook app"), always pick manual mode.
+   - Exception: if the slice involves real credentials, API keys, or external account setup (e.g. "Register Google Cloud project"), always pick manual mode.
 
 6. **Manual mode (guided implementation)**
    - Pick a random phrase:
