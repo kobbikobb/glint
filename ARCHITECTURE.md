@@ -118,7 +118,6 @@ Popup opens
 6. **Rule-based fallback** — app works fully without an LLM. LLM is a quality-of-life upgrade.
 7. **No cloud** — everything runs on-device. Future optional cloud-LLM is an upgrade path.
 8. **OAuth tokens in Keychain** — standard macOS security practice.
-9. **No direct Facebook integration** — Facebook Graph API event endpoints are dead. See `Docs/adr/001-drop-facebook-direct-integration.md`.
 
 ## Data sources (adapters)
 
