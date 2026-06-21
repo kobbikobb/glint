@@ -1,6 +1,10 @@
 import Foundation
 import Security
 
+/// Secure OAuth token storage. Used by Google, Outlook sources.
+/// Tokens namespaced by service name (e.g. "com.glint.google").
+/// Not for general key-value storage — Keychain items persist
+/// across app reinstalls and are encrypted at rest.
 struct Keychain {
     func save(_ value: String, service: String, account: String) throws {
         guard let data = value.data(using: .utf8) else { throw KeychainError.invalidData }
