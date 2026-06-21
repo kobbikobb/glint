@@ -135,8 +135,6 @@ protocol Source {
 | Google Calendar | Google Calendar API (REST) | OAuth 2.0 | Read-only events for today |
 | Outlook / Office 365 | Microsoft Graph API (REST) | OAuth 2.0 | Calendar + mail |
 | Gmail | Gmail API (REST) | OAuth 2.0 | Fetch recent inbox, classify urgency |
-| Facebook | Graph API (REST) | OAuth 2.0 | Group events only |
-| (future) Slack | Slack API | OAuth | Highlights |
 
 ## Data flow — principle
 
@@ -146,7 +144,6 @@ protocol Source {
 
 ```
 User sets up sources in Settings
-  ├─ Facebook (OAuth)
   ├─ Google Calendar (OAuth)
   ├─ Outlook (OAuth)
   └─ Gmail (OAuth)
@@ -163,7 +160,6 @@ Scheduler fires (activity trigger or time-based)
        │
        ▼
 JobRunner iterates configured Sources
-  ├─ FacebookSource.fetch()  ──► Items
   ├─ GoogleCalendarSource.fetch() ──► Items
   ├─ OutlookSource.fetch()   ──► Items
   └─ GmailSource.fetch()     ──► Items
@@ -213,7 +209,6 @@ Sources/Glint/
 │   └── JobRunner.swift         # runs sources, stores results
 ├── Sources/
 │   ├── Source.swift            # protocol
-│   ├── FacebookSource.swift    # (future)
 │   ├── GoogleCalendarSource.swift
 │   ├── GmailSource.swift
 │   └── OutlookSource.swift

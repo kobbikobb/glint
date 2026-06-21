@@ -4,7 +4,7 @@
 
 ## Problem
 
-Every morning you open 4+ apps (calendar, email, Facebook, Slack) to figure out what actually matters today. Most of it is noise — recurring standups, irrelevant group events, FYI emails. The signal is buried.
+Every morning you open 4+ apps (calendar, email, Slack) to figure out what actually matters today. Most of it is noise — recurring standups, irrelevant group events, FYI emails. The signal is buried.
 
 ## Solution
 
@@ -12,8 +12,8 @@ A macOS app that lives in the background, connects to your data sources, and sho
 
 ## Key features
 
-- **Multi-source aggregation** — Calendar (iCloud/Google), Gmail, Facebook events, more later
-- **Per-source noise filters** — e.g. "only show events from these Facebook groups", "hide recurring meetings"
+- **Multi-source aggregation** — Calendar (iCloud/Google), Gmail, more later
+- **Per-source noise filters** — e.g. "hide recurring meetings"
 - **Smart triage** — classifies items as urgent / important / noise
 - **Optional local LLM** (Ollama + Qwen3:8B) — intelligently summarizes your day, explains why things matter
 - **Activity-triggered popup** — 1 min after you unlock / become active in the morning

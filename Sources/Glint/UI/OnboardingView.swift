@@ -61,12 +61,12 @@ struct OnboardingView: View {
             Text("Connect your sources")
                 .font(.title2)
                 .bold()
-            Text("Glint works with Google Calendar, Outlook, Gmail, and Facebook. You can add them anytime in Settings.")
+            Text("Glint works with Google Calendar, Outlook, and Gmail. You can add them anytime in Settings.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 32)
             HStack(spacing: 12) {
-                ForEach(["Google", "Outlook", "Gmail", "Facebook"], id: \.self) { name in
+                ForEach(["Google", "Outlook", "Gmail"], id: \.self) { name in
                     VStack(spacing: 4) {
                         Image(systemName: icon(for: name))
                             .font(.title3)
@@ -145,7 +145,6 @@ struct OnboardingView: View {
         case "Google": "calendar"
         case "Outlook": "envelope"
         case "Gmail": "envelope.fill"
-        case "Facebook": "person.2"
         default: "questionmark"
         }
     }

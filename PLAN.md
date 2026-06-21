@@ -31,7 +31,7 @@ Scaffold, menu bar, welcome screen, git, CI, morning unlock detection.
 
 - [x] 6a  First launch → full-screen welcome wizard (not empty window)
 - [x] 6b  Step 1: "Glint helps you start your day informed"
-- [x] 6c  Step 2: "Connect your first source" (choose Facebook/Google/etc.)
+- [x] 6c  Step 2: "Connect your first source" (choose Google/Outlook/etc.)
 - [x] 6d  Step 3: Set trigger time / preferences
 - [x] 6e  Step 4: "All set — see you tomorrow morning"
 - [x] 6f  Subsequent launches → normal menu bar app (no wizard)
@@ -55,85 +55,64 @@ _Establish correct seams before adding real sources._
 - [x] 7.5f  Add CI guardrails: import-boundary checks, directory-structure check, dead-symbol detection (DoD: introduce deliberate violation, verify CI failure, revert)
 - [x] 7.5g  Move `ContentView.swift` → `UI/PopupView.swift`, restructure directories to match target layout
 
-## Slice 8 — Facebook OAuth
+## Slice 8 — Google (Calendar + Gmail)
 
-- [ ] 8a  Register Facebook app, configure OAuth redirect URI
-- [ ] 8b  OAuth flow: open browser → receive token → store in Keychain
-- [ ] 8c  "Connect Facebook" UI in settings, connected/disconnected state
-- [ ] 8d  Token stored via Keychain, wire into ConfigStore so SourceConfig.authState reflects connection (DoD: token fetch returns non-401)
+- [ ] 8a  Google Cloud project, Calendar + Gmail API enabled, OAuth setup
+- [ ] 8b  OAuth flow → token in Keychain (shared for Calendar + Gmail)
+- [ ] 8c  `GoogleCalendarSource` implements `Source`
+- [ ] 8d  `GmailSource` implements `Source`
+- [ ] 8e  Gmail: fetch recent inbox (last 24h), basic urgency keywords
+- [ ] 8f  Display Calendar + Gmail items in popup
 
-## Slice 9 — Facebook events (first real data)
+## Slice 9 — Outlook calendar
 
-- [ ] 9a  `FacebookSource` implements `Source` protocol
-- [ ] 9b  Fetch upcoming group events via Graph API
-- [ ] 9c  Parse into `Item` model
-- [ ] 9d  Register `FacebookSource` with `JobRunner` in DI container so it actually runs
-- [ ] 9e  Stored in DB → displayed in popup (DoD: fetch via Scheduler → items visible in popup)
+- [ ] 9a  Azure app registration + Microsoft Graph API + OAuth setup
+- [ ] 9b  OAuth flow → token in Keychain
+- [ ] 9c  `OutlookCalendarSource` implements `Source`
+- [ ] 9d  Display in popup
 
-## Slice 10 — Google Calendar
+## Slice 10 — Rule-based filters
 
-- [ ] 10a  Google Cloud project + Calendar API enabled + OAuth setup
-- [ ] 10b  OAuth flow → token in Keychain
-- [ ] 10c  `GoogleCalendarSource` implements `Source`
-- [ ] 10d  Display alongside Facebook in popup
+- [ ] 10a  Per-source filter config model (include/exclude lists)
+- [ ] 10b  Basic filter: hide recurring meetings by title pattern
+- [ ] 10c  Filtered items → popup (no LLM needed)
 
-## Slice 11 — Outlook calendar
+## Slice 11 — LLM integration
 
-- [ ] 11a  Azure app registration + Microsoft Graph API + OAuth setup
-- [ ] 11b  OAuth flow → token in Keychain
-- [ ] 11c  `OutlookCalendarSource` implements `Source`
-- [ ] 11d  Display in popup
+- [ ] 11a  Detect Ollama running on localhost:11434
+- [ ] 11b  Send items for classification via OpenAI-compatible API
+- [ ] 11c  Parse response into urgent / important / noise
+- [ ] 11d  Fallback gracefully if Ollama is not running (DoD: items displayed as .unclassified, no error UI, silent fallback to NoopClassifier)
 
-## Slice 12 — Gmail
+## Slice 12 — LLM narrative summary
 
-- [ ] 12a  Google Cloud project + Gmail API + OAuth setup
-- [ ] 12b  Fetch recent inbox (last 24h)
-- [ ] 12c  Basic urgency keywords (deadline, urgent, EOD, etc.)
-- [ ] 12d  Display in popup
+- [ ] 12a  Add `loadSummary() -> String?` to `DigestService` for narrative, send items + classification to LLM
+- [ ] 12b  Display "Here's what matters today" paragraph in popup (requires UI slot in PopupView)
 
-## Slice 13 — Rule-based filters
+## Slice 13 — Popup polish
 
-- [ ] 13a  Per-source filter config model (include/exclude lists)
-- [ ] 13b  Basic filter: hide recurring meetings by title pattern
-- [ ] 13c  Facebook filter: show events only from selected groups
-- [ ] 13d  Filtered items → popup (no LLM needed)
+- [ ] 13a  Slide-in animation
+- [ ] 13b  Auto-dismiss after N seconds (configurable via ConfigStore, Timer in AppDelegate/PopupView closes window)
+- [ ] 13c  Snooze button (dismiss + retry in 10 min)
+- [ ] 13d  Dark mode support
 
-## Slice 14 — LLM integration
+## Slice 14 — SQLite (GRDB)
 
-- [ ] 14a  Detect Ollama running on localhost:11434
-- [ ] 14b  Send items for classification via OpenAI-compatible API
-- [ ] 14c  Parse response into urgent / important / noise
-- [ ] 14d  Fallback gracefully if Ollama is not running (DoD: items displayed as .unclassified, no error UI, silent fallback to NoopClassifier)
+- [ ] 14a  Add GRDB dependency
+- [ ] 14b  `SQLiteStorage` implements `Storage` protocol
+- [ ] 14c  Migrate from `UserDefaultsStorage` (DoD: seed UserDefaults, run migration, SQLite store has matching data)
+- [ ] 14d  Add change notifications / hooks for downstream consumers
 
-## Slice 15 — LLM narrative summary
+## Slice 15 — Release pipeline
 
-- [ ] 15a  Add `loadSummary() -> String?` to `DigestService` for narrative, send items + classification to LLM
-- [ ] 15b  Display "Here's what matters today" paragraph in popup (requires UI slot in PopupView)
+- [ ] 15a  Code signing (Developer ID Application)
+- [ ] 15b  Notarization in CI
+- [ ] 15c  `.app.zip` artifact on GitHub Release
+- [ ] 15d  Release workflow on `git tag v*`
 
-## Slice 16 — Popup polish
+## Slice 16 — Homebrew tap
 
-- [ ] 16a  Slide-in animation
-- [ ] 16b  Auto-dismiss after N seconds (configurable via ConfigStore, Timer in AppDelegate/PopupView closes window)
-- [ ] 16c  Snooze button (dismiss + retry in 10 min)
-- [ ] 16d  Dark mode support
-
-## Slice 17 — SQLite (GRDB)
-
-- [ ] 17a  Add GRDB dependency
-- [ ] 17b  `SQLiteStorage` implements `Storage` protocol
-- [ ] 17c  Migrate from `UserDefaultsStorage` (DoD: seed UserDefaults, run migration, SQLite store has matching data)
-- [ ] 17d  Add change notifications / hooks for downstream consumers
-
-## Slice 18 — Release pipeline
-
-- [ ] 18a  Code signing (Developer ID Application)
-- [ ] 18b  Notarization in CI
-- [ ] 18c  `.app.zip` artifact on GitHub Release
-- [ ] 18d  Release workflow on `git tag v*`
-
-## Slice 19 — Homebrew tap
-
-- [ ] 19a  Create `glint/homebrew-tap` repo
-- [ ] 19b  Write `Formula/glint.rb` with versioned URL + checksum
-- [ ] 19c  CI auto-updates formula on new release
-- [ ] 19d  `brew tap glint/tap && brew install glint` works
+- [ ] 16a  Create `glint/homebrew-tap` repo
+- [ ] 16b  Write `Formula/glint.rb` with versioned URL + checksum
+- [ ] 16c  CI auto-updates formula on new release
+- [ ] 16d  `brew tap glint/tap && brew install glint` works
