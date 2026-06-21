@@ -47,10 +47,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func showWindow() {
-        NSApp.setActivationPolicy(.regular)
         if let window = NSApplication.shared.windows.first {
-            window.orderFrontRegardless()
-            window.makeKey()
+            NSApplication.shared.activate(ignoringOtherApps: true)
+            window.makeKeyAndOrderFront(nil)
         }
     }
 }

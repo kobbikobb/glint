@@ -136,7 +136,6 @@ protocol Source {
 | Google Calendar | Google Calendar API (REST) | OAuth 2.0 | Read-only events for today |
 | Outlook / Office 365 | Microsoft Graph API (REST) | OAuth 2.0 | Calendar + mail |
 | Gmail | Gmail API (REST) | OAuth 2.0 | Fetch recent inbox, classify urgency |
-| — | — | — | — |
 
 ## Data flow — principle
 

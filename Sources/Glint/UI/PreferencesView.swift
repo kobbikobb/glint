@@ -4,7 +4,7 @@ struct PreferencesView: View {
     var body: some View {
         Form {
             Section("Sources") {
-                Text("Sources will be available in upcoming slices.")
+                Text("Sources will be available in future updates.")
                     .foregroundStyle(.secondary)
             }
         }
