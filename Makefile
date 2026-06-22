@@ -2,16 +2,16 @@ APP_NAME = Glint
 BUILD_DIR = .build/arm64-apple-macosx/debug
 APP_BUNDLE = $(BUILD_DIR)/$(APP_NAME).app
 
-build:
+build: generate-secrets
 	swift build
 
-test:
+test: generate-secrets
 	swift test
 
 clean:
 	swift package clean
 
-run:
+run: generate-secrets
 	swift run
 
 bundle: build
@@ -37,4 +37,7 @@ check-guardrails:
 check-deadcode:
 	periphery scan
 
-.PHONY: build test clean run bundle lint format lint-format check-guardrails check-deadcode
+generate-secrets:
+	scripts/generate-secrets.sh
+
+.PHONY: build test clean run bundle lint format lint-format check-guardrails check-deadcode generate-secrets

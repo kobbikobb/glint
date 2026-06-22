@@ -7,8 +7,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var preferencesWindow: NSWindow?
 
     @Injected(\.scheduler) private var scheduler
+    @Injected(\.jobRunner) private var jobRunner
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        Task { await jobRunner.register(GoogleCalendarSource()) }
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.image = NSImage(systemSymbolName: "sun.max", accessibilityDescription: "Glint")
 
